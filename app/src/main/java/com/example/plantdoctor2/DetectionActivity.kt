@@ -159,7 +159,7 @@ class DetectionActivity : AppCompatActivity() {
         } else {
             if (results.detectedDesease.equals("healthy")) {
                 Toast.makeText(baseContext,
-                    "Detected result is \"HEALTHY\"!\n Scores: ${results.scores}",
+                    "Detected result is \n \"HEALTHY\"!\n Scores: ${results.scores}",
                     Toast.LENGTH_LONG)
                     .show()
             } else {
