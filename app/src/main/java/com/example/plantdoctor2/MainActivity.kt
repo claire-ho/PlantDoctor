@@ -47,16 +47,6 @@ class MainActivity : AppCompatActivity() {
             // val message = getMessage()
 
             val intent = Intent(context, CameraActivity::class.java)
-            /*
-            intent.apply {
-                action = Intent.ACTION_VIEW
-                putExtra(Intent.EXTRA_TEXT, "Change me ....")
-                type = "text/plain"
-            }
-            context.startActivity(intent)
-
-             */
-
             startForResult.launch(intent)
         }
     }

@@ -42,6 +42,10 @@
             android:name=".DetectionActivity"
             android:exported="false"
             android:label="" />
+        <activity
+            android:name=".AdviseLlmActivity"
+            android:exported="false"
+            android:label="" />
     </application>
 
 </manifest>

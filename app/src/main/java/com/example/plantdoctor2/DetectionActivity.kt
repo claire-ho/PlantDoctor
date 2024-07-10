@@ -73,7 +73,7 @@ class DetectionActivity : AppCompatActivity() {
 
         detectButton.setOnClickListener {v ->
             val context = v.context
-            textView.text = "Start detecting photo :  " + imageBytes.size()/1000  + " K"
+            textView.text = "Detecting photo size: " + imageBytes.size()/1000  + " K"
             post(imageBytes, content_uri_builder.build())
         }
     }
@@ -115,8 +115,8 @@ class DetectionActivity : AppCompatActivity() {
     private fun post(imageBytes:ByteArrayOutputStream, imageUri: Uri ) {
         Log.d(TAG, "Preparing HTTP request ....")
         val client = OkHttpClient()
-        // val url = URL("http://lfuh.dynu.net:8080/imageTest")
-        val url = URL("http://24.4.145.49:8080/imageTest")
+        val url = URL("http://lfuh.dynu.net:8080/imageTest")
+        // val url = URL("http://24.4.145.49:8080/imageTest")
 
         // Save bitmap to a temporary file
         val applicationContext = baseContext.applicationContext
@@ -167,7 +167,8 @@ class DetectionActivity : AppCompatActivity() {
                 //   .show("Detected results: $results.detectedDesease", "Ask for advise?",)
                 var desease = results.detectedDesease?.uppercase()
                 createDialog("Detected results",
-                    "$desease!\n\n Ask for advise?")
+                    "$desease!\n\n Ask for advise?",
+                    desease?:"")
                 alertDialog?.show()
             }
         }
@@ -198,14 +199,26 @@ class DetectionActivity : AppCompatActivity() {
         return results
     }
 
-    fun createDialog(title:String, message: String) {
+    fun createDialog(title:String, message: String, desease: String) {
         val alertDialogBuilder = AlertDialog.Builder(this)
         alertDialogBuilder.setTitle(title)
         alertDialogBuilder.setMessage(message)
         alertDialogBuilder.setPositiveButton("Yes") { _: DialogInterface, _: Int ->
+            // val message = getMessage()
+
+            val intent = Intent(baseContext, AdviseLlmActivity::class.java)
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            intent.apply {
+                action = Intent.ACTION_VIEW
+                putExtra(Intent.EXTRA_TEXT, desease)
+                type = "text/plain"
+            }
+            baseContext.startActivity(intent)
             finish()
         }
-        alertDialogBuilder.setNegativeButton("No", { dialogInterface: DialogInterface, i: Int -> })
+        alertDialogBuilder.setNegativeButton("No") { dialogInterface: DialogInterface, _: Int ->
+            finish()
+        }
         alertDialog = alertDialogBuilder.create()
     }
 }
