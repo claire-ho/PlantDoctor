@@ -74,4 +74,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
 
+    // ChatGPT
+    implementation("com.android.volley:volley:1.2.0")
+
 }

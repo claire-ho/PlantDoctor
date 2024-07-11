@@ -46,6 +46,10 @@
             android:name=".AdviseLlmActivity"
             android:exported="false"
             android:label="" />
+        <activity
+            android:name=".AdviseChatGptActivity"
+            android:exported="false"
+            android:label="" />
     </application>
 
 </manifest>

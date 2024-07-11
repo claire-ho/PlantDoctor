@@ -121,9 +121,10 @@ class DetectionActivity : AppCompatActivity() {
         // Save bitmap to a temporary file
         val applicationContext = baseContext.applicationContext
         val mediaType = contentResolver.getType(imageUri)?.let { it.toMediaTypeOrNull() }
+        val tempFileName = getTempFileName(imageUri)
         val imageFile = File(
             applicationContext.cacheDir,
-            "temp.jpg"
+            tempFileName
         )
         val outputStream = FileOutputStream(imageFile)
         imageBytes.writeTo(outputStream)
@@ -157,7 +158,7 @@ class DetectionActivity : AppCompatActivity() {
             Toast.makeText(baseContext, responseBody, Toast.LENGTH_LONG)
                 .show()
         } else {
-            if (results.detectedDesease.equals("healthy")) {
+            if (results.detectedDesease.equals("healthy!")) {
                 Toast.makeText(baseContext,
                     "Detected result is \n \"HEALTHY\"!\n Scores: ${results.scores}",
                     Toast.LENGTH_LONG)
@@ -174,6 +175,14 @@ class DetectionActivity : AppCompatActivity() {
         }
     }
 
+    private fun getTempFileName(uri:Uri): String {
+        var filename:String = "temp.jpg"
+
+        var paths = uri.toString().split('/')
+        filename = paths[paths.size-1] + ".jpg"
+        Log.d(TAG, "filename: $filename" )
+        return filename
+    }
 
     private fun processResponse(detectedResponse:String): DetectedResults {
         var tokens = detectedResponse.split(",", ignoreCase = true, limit=2)
@@ -203,10 +212,22 @@ class DetectionActivity : AppCompatActivity() {
         val alertDialogBuilder = AlertDialog.Builder(this)
         alertDialogBuilder.setTitle(title)
         alertDialogBuilder.setMessage(message)
-        alertDialogBuilder.setPositiveButton("Yes") { _: DialogInterface, _: Int ->
-            // val message = getMessage()
 
+        alertDialogBuilder.setNeutralButton("ChatGPT") { _: DialogInterface, _: Int ->
+            // val message = getMessage()
+            val intent = Intent(baseContext, AdviseChatGptActivity::class.java)
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            intent.apply {
+                action = Intent.ACTION_VIEW
+                putExtra(Intent.EXTRA_TEXT, desease)
+                type = "text/plain"
+            }
+            baseContext.startActivity(intent)
+            finish()
+        }
+        alertDialogBuilder.setPositiveButton("Gemini") { _: DialogInterface, _: Int ->
             val intent = Intent(baseContext, AdviseLlmActivity::class.java)
+            // val intent = Intent(baseContext, AdviseChatGptActivity::class.java)
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             intent.apply {
                 action = Intent.ACTION_VIEW
