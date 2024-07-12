@@ -3,6 +3,8 @@ package com.example.plantdoctor2
 import android.annotation.SuppressLint
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.res.Configuration
+import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
@@ -22,6 +24,7 @@ import androidx.appcompat.app.AppCompatActivity
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
+import okhttp3.OkHttpClient.Builder
 import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -30,7 +33,9 @@ import java.io.File
 import java.io.FileDescriptor
 import java.io.FileOutputStream
 import java.io.IOException
+import java.net.SocketTimeoutException
 import java.net.URL
+import java.util.concurrent.TimeUnit
 
 
 class DetectionActivity : AppCompatActivity() {
@@ -41,6 +46,7 @@ class DetectionActivity : AppCompatActivity() {
                                var errMessage: String? = null)
 
     var alertDialog: AlertDialog? = null
+
     @SuppressLint("WrongThread")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,26 +88,31 @@ class DetectionActivity : AppCompatActivity() {
         try {
             val parcelFileDescriptor = contentResolver.openFileDescriptor(selectedFileUri, "r")
             val fileDescriptor: FileDescriptor = parcelFileDescriptor!!.fileDescriptor
-            val image = BitmapFactory.decodeFileDescriptor(fileDescriptor)
+            var image = BitmapFactory.decodeFileDescriptor(fileDescriptor)
             parcelFileDescriptor.close()
 
-            val scaledImage = rotateAndResizeBitmap(image, 350, 350, 90f)
-            return scaledImage
+            var config: Configuration = getResources().getConfiguration()
+            if (config.orientation == ORIENTATION_PORTRAIT) {
+                // We found resize reduces the detection accuracy a lot.  Turn off the scale first.
+                image = rotateAndResizeBitmap(image, 350, 350, 90f,
+                                              should_scaled = false)
+            }
+            return image
         } catch (e: IOException) {
             e.printStackTrace()
         }
         return null
     }
 
-    fun rotateAndResizeBitmap(bm: Bitmap, newWidth: Int, newHeight: Int, degrees: Float): Bitmap {
+    fun rotateAndResizeBitmap(bm: Bitmap, newWidth: Int, newHeight: Int, degrees: Float,
+                              should_scaled: Boolean = true): Bitmap {
         val width = bm.width
         val height = bm.height
         val scaleWidth = (newWidth.toFloat()) / width
         val scaleHeight = (newHeight.toFloat()) / height
         // CREATE A MATRIX FOR THE MANIPULATION
         val matrix = Matrix()
-        // RESIZE THE BIT MAP
-        matrix.postScale(scaleWidth, scaleHeight)
+        if (should_scaled) matrix.postScale(scaleWidth, scaleHeight)
         matrix.postRotate(degrees)
 
         // "RECREATE" THE NEW BITMAP
@@ -114,7 +125,10 @@ class DetectionActivity : AppCompatActivity() {
 
     private fun post(imageBytes:ByteArrayOutputStream, imageUri: Uri ) {
         Log.d(TAG, "Preparing HTTP request ....")
-        val client = OkHttpClient()
+        val client = OkHttpClient.Builder()
+            // Long timeout since the ML server is very remote and low bandwidth.
+            .connectTimeout(5, TimeUnit.SECONDS)
+            .build()
         val url = URL("http://lfuh.dynu.net:8080/imageTest")
         // val url = URL("http://24.4.145.49:8080/imageTest")
 
@@ -148,8 +162,18 @@ class DetectionActivity : AppCompatActivity() {
             .build()
 
         Log.d(TAG, "Sending HTTP with ContentLength:" + body.contentLength())
-        val response = client.newCall(request).execute()
-        val responseBody = response.body!!.string()
+        var responseBody:String = "No response"
+        try {
+            val response = client.newCall(request).execute()
+            responseBody = response.body!!.string()
+            // Handle successful response
+        } catch (e: SocketTimeoutException) {
+            // Handle timeout exception
+            Log.e("Network Error", "Socket timeout", e)
+            createOkDialog("Network connection timeout!",
+                e.message?:"Failed to connect to ML Server...")
+            alertDialog?.show()
+        }
 
         //Response
         Log.d(TAG, "Response Body: $responseBody")
@@ -158,16 +182,15 @@ class DetectionActivity : AppCompatActivity() {
             Toast.makeText(baseContext, responseBody, Toast.LENGTH_LONG)
                 .show()
         } else {
-            if (results.detectedDesease.equals("healthy!")) {
-                Toast.makeText(baseContext,
-                    "Detected result is \n \"HEALTHY\"!\n Scores: ${results.scores}",
-                    Toast.LENGTH_LONG)
-                    .show()
+            if (results.detectedDesease.equals("healthy")) {
+                createOkDialog("Detected results",
+                    "They are HEALTHY!\n\n Scores: ${results.scores}")
+                alertDialog?.show()
             } else {
                 // FurtherActionDialog(baseContext)
                 //   .show("Detected results: $results.detectedDesease", "Ask for advise?",)
                 var desease = results.detectedDesease?.uppercase()
-                createDialog("Detected results",
+                createAdviseDialog("Detected results",
                     "$desease!\n\n Ask for advise?",
                     desease?:"")
                 alertDialog?.show()
@@ -208,7 +231,7 @@ class DetectionActivity : AppCompatActivity() {
         return results
     }
 
-    fun createDialog(title:String, message: String, desease: String) {
+    fun createAdviseDialog(title:String, message: String, desease: String) {
         val alertDialogBuilder = AlertDialog.Builder(this)
         alertDialogBuilder.setTitle(title)
         alertDialogBuilder.setMessage(message)
@@ -238,6 +261,16 @@ class DetectionActivity : AppCompatActivity() {
             finish()
         }
         alertDialogBuilder.setNegativeButton("No") { dialogInterface: DialogInterface, _: Int ->
+            finish()
+        }
+        alertDialog = alertDialogBuilder.create()
+    }
+
+    fun createOkDialog(title:String, message: String) {
+        val alertDialogBuilder = AlertDialog.Builder(this)
+        alertDialogBuilder.setTitle(title)
+        alertDialogBuilder.setMessage(message)
+        alertDialogBuilder.setPositiveButton("OK") { _: DialogInterface, _: Int ->
             finish()
         }
         alertDialog = alertDialogBuilder.create()

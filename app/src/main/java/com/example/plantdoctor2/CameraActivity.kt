@@ -38,7 +38,7 @@ import java.util.concurrent.Executors
 
 typealias LumaListener = (luma: Double) -> Unit
 
-var JPEG_QUALITY:Int = 20   // Range 1-100, we need small size image for inference.
+var JPEG_QUALITY:Int = 40   // Range 1-100, we need small size image for inference.
 
 class CameraActivity : AppCompatActivity() {
     private lateinit var viewBinding: ActivityMainBinding

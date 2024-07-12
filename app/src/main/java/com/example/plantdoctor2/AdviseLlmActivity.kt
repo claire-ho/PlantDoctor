@@ -10,6 +10,7 @@ import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.ViewModel
 import com.google.ai.client.generativeai.GenerativeModel
@@ -47,7 +48,7 @@ class AdviseLlmActivity: AppCompatActivity() {
         val titleView: TextView = findViewById(R.id.id_title)
         val adviseView: TextView = findViewById(R.id.id_advise)
         val okButton: Button = findViewById<Button>(R.id.id_ok_button)
-        titleView.text = desease
+        titleView.text = desease + " - Waiting for suggestions from Gemini ..."
 
         val prompt = "Please answer in Traditional Chines: Tell me the treatments for PassionFruit with $desease decease."
         lifecycleScope.launch {

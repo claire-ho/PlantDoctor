@@ -66,7 +66,7 @@ class AdviseChatGptActivity : AppCompatActivity() {
         queryEdt.setOnEditorActionListener(OnEditorActionListener { v, actionId, event ->
             if (actionId == EditorInfo.IME_ACTION_SEND) {
                 // setting response tv on below line.
-                responseTV.text = "Please wait.."
+                responseTV.text = "Waiting for suggestions from ChapGPT ...\""
                 // validating text
                 if (queryEdt.text.toString().length > 0) {
                     // calling get response to get the response.
@@ -94,8 +94,9 @@ class AdviseChatGptActivity : AppCompatActivity() {
             {
             "model": "gpt-3.5-turbo",
             "messages": [{"role": "user", "content": "$query"}],
-            "temperature": 0.5,
-            "max_tokens": 200
+            "temperature": 0.2,
+            "n": 1,
+            "max_tokens": 300
             }
         """.trimIndent()
 
