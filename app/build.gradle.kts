@@ -76,5 +76,4 @@ dependencies {
 
     // ChatGPT
     implementation("com.android.volley:volley:1.2.0")
-
 }
