@@ -2,6 +2,9 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    id("org.jetbrains.kotlin.plugin.compose")
+    // Existing plugins
+    // alias(libs.plugins.compose.compiler)
 }
 
 android {
@@ -35,12 +38,14 @@ android {
         jvmTarget = "1.8"
     }
     buildFeatures {
+        compose = true
         viewBinding = true
     }
 }
 
 dependencies {
-
+    var composeBom = platform("androidx.compose:compose-bom:2024.06.00")
+    implementation(composeBom)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -49,6 +54,17 @@ dependencies {
     implementation(libs.androidx.ui.android)
     implementation(libs.androidx.material3.android)
     implementation(libs.androidx.ui.tooling.preview.android)
+    implementation("androidx.core:core-ktx:1.13.1")
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material3:material3:1.2.1")
+    implementation("androidx.compose.material3:material3-window-size-class:1.2.1")
+    implementation("androidx.compose.material:material-icons-extended")
+    implementation("androidx.compose.material3:material3-adaptive-navigation-suite:1.3.0-beta03")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("com.google.android.material:material:1.12.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.2")
+    implementation("androidx.activity:activity-compose:1.9.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -67,7 +83,7 @@ dependencies {
     // If you want to additionally use the CameraX View class
     implementation("androidx.camera:camera-view:${camerax_version}")
     // If you want to additionally add CameraX ML Kit Vision Integration
-    implementation("androidx.camera:camera-mlkit-vision:${camerax_version}")
+    implementation(libs.androidx.camera.mlkit.vision)
     // If you want to additionally use the CameraX Extensions library
     implementation("androidx.camera:camera-extensions:${camerax_version}")
 
@@ -78,4 +94,5 @@ dependencies {
 
     // ChatGPT
     implementation("com.android.volley:volley:1.2.0")
+    debugImplementation(libs.androidx.ui.tooling)
 }

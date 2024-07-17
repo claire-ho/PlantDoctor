@@ -9,4 +9,19 @@
     <string name="wait_gemini_results">Waiting for suggestions from Gemini ...</string>
     <string name="wait_openai_results">Waiting for suggestions from ChatGPT ...</string>
     <string name="ok">OK</string>
+    <string name="select_category">Select a category ... </string>
+    <string name="select_plant">Select a plant ...</string>
+    <string name="chat_with_robot">ChatGPT</string>
+    <string name="category_leaves">leaves</string>
+    <string name="category_stems">stems</string>
+    <string name="category_fruits">fruits</string>
+    <string name="category_flowers">flowers</string>
+    <string name="category_pests">pests</string>
+    <string name="plant_passion_fruit">Passion Fruit</string>
+    <string name="plant_strawberry">Strawberry</string>
+    <string name="plant_mango">Mango</string>
+    <string name="plant_banana">Banana</string>
+    <string name="plant_apple">Apple</string>
+    <string name="plant_pineapple">Pineapple</string>
+    <string name="search_hint">Enter the decease for suggestions ... </string>
 </resources>
